@@ -51,9 +51,11 @@ const updateById = (req, res) => {
   if (!req.body || !req.body.title) {
     return res.status(404).json({ message: "not found" });
   }
-  let userId = req.body.id;
+  let userId = req.params.id;
+  userId = Number(userId);
+  console.log(userId);
+
   let newTutorial = {
-    id: req.body.id,
     title: req.body.title,
     description: req.body.description,
     published: req.body.published,

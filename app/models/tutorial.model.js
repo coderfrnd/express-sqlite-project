@@ -43,12 +43,17 @@ Tutorial.getAllPublished = (result) => {
 };
 
 Tutorial.findById = (id, result) => {
-  let sqlQuery = `SELECT * FROM tutorials where id = ${id}`;
-  DB.get(sqlQuery, [], (err, row) => {
+  let sqlQuery = `SELECT * FROM tutorials WHERE id = ?`;
+
+  DB.get(sqlQuery, [id], (err, row) => {
     if (err) {
       return result(err, null);
     }
-    // console.log(row);
+
+    if (!row) {
+      return result(null, { result: "Id not found" });
+    }
+
     result(null, row);
   });
 };
@@ -57,16 +62,15 @@ Tutorial.updateById = (id, newTutorial, result) => {
   let sqlQuery = `UPDATE tutorials SET title = ?, description = ?, published = ? WHERE id = ?`;
   DB.run(
     sqlQuery,
-    [
-      newTutorial.title,
-      newTutorial.description,
-      newTutorial.published,
-      newTutorial.id,
-    ],
+    [newTutorial.title, newTutorial.description, newTutorial.published, id],
     function (err) {
       if (err) {
         return result(err, null);
       }
+      if (this.changes === 0) {
+        return result(null, { message: "No record found with this id " });
+      }
+
       result(null, { id: this.lastID, ...newTutorial });
     }
   );
@@ -78,8 +82,10 @@ Tutorial.removeById = (id, result) => {
     if (err) {
       return result(err, null);
     }
+    if (this.changes === 0) {
+      return result(null, { message: "No record found with this id" });
+    }
     console.log("hello");
-
     result(null, id);
   });
 };
